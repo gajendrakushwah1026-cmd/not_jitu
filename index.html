@@ -12,27 +12,25 @@
         .video-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1.5rem; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .fade-in { animation: fadeIn 0.3s ease-out forwards; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="min-h-screen pb-20">
 
-<!-- Admin Bar (Sirf Login ke baad dikhega) -->
 <div id="adminStatusBar" class="hidden bg-indigo-950 text-white text-[10px] py-1.5 text-center font-bold uppercase tracking-widest">
-    Admin Mode Active • Aap ab videos add/delete kar sakte hain
+    Admin Mode Active • Welcome Jitu
 </div>
 
-<!-- Header -->
 <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-gray-200 px-4 py-3">
     <div class="max-w-7xl mx-auto flex flex-col gap-3">
         <div class="flex justify-between items-center">
             <h1 class="text-xl font-black text-indigo-700 tracking-tight">EduVault</h1>
             <div class="flex gap-2">
-                <!-- Ye button hamesha kaam karega -->
                 <button id="authBtn" onclick="openLoginModal()" class="bg-white border border-gray-300 px-4 py-2 rounded-xl text-sm font-bold shadow-sm active:scale-95 transition-all">
                     <span id="authBtnText">Admin</span>
                 </button>
                 <button id="addVideoBtn" onclick="openAddModal()" class="hidden bg-indigo-600 text-white px-5 py-2 rounded-xl text-sm font-bold shadow-md shadow-indigo-100 active:scale-95 transition-all">
-                    + Add
+                    + Add Video
                 </button>
             </div>
         </div>
@@ -43,27 +41,28 @@
 </header>
 
 <main class="max-w-7xl mx-auto p-4">
-    <!-- Loading Screen (Agar database connect nahi hota to ye 5s baad hat jayega) -->
     <div id="loadingStatus" class="flex flex-col items-center justify-center py-20 text-gray-500">
-        <div class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-        <p class="font-medium">Cloud se connect ho raha hai...</p>
+        <div id="loaderIcon" class="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p id="loadingMsg" class="font-medium text-center px-4 text-sm">Vault connect ho raha hai...</p>
     </div>
     
     <div id="contentArea" class="hidden">
         <div id="subjectFilters" class="flex flex-wrap gap-2 mb-6 overflow-x-auto pb-2 no-scrollbar"></div>
         <div id="videoContainer" class="video-grid"></div>
         <div id="emptyState" class="hidden text-center py-20">
-            <p class="text-gray-400 font-bold">Koi video nahi mili</p>
+            <div class="bg-white p-8 rounded-3xl inline-block shadow-sm border border-gray-100">
+                <p class="text-gray-400 font-bold">Abhi koi content nahi hai</p>
+                <p class="text-xs text-gray-300">Admin se login karke videos add karein.</p>
+            </div>
         </div>
     </div>
 </main>
 
-<!-- Login Modal -->
+<!-- Modals -->
 <div id="authModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-[100] p-6">
     <div class="bg-white rounded-3xl w-full max-w-xs p-6 fade-in shadow-2xl">
-        <h2 class="text-xl font-extrabold mb-2 text-gray-800">Admin Login</h2>
-        <p class="text-xs text-gray-500 mb-4">Sirf owner hi videos add kar sakta hai.</p>
-        <input id="adminPass" type="password" placeholder="Password daalein" class="w-full bg-gray-50 border-2 border-gray-100 p-4 rounded-2xl mb-4 outline-none focus:border-indigo-500 transition-all text-center font-bold tracking-widest">
+        <h2 class="text-xl font-extrabold mb-2 text-gray-800 text-center">Admin Login</h2>
+        <input id="adminPass" type="password" placeholder="Pass Key" class="w-full bg-gray-50 border-2 border-gray-100 p-4 rounded-2xl mb-4 outline-none focus:border-indigo-500 transition-all text-center font-bold tracking-widest">
         <div class="flex gap-3">
             <button onclick="closeLoginModal()" class="flex-1 py-3 text-gray-500 font-bold text-sm">Cancel</button>
             <button onclick="handleLoginAttempt()" class="flex-1 bg-indigo-600 text-white py-3 rounded-2xl font-bold text-sm shadow-lg shadow-indigo-100">Unlock</button>
@@ -71,17 +70,16 @@
     </div>
 </div>
 
-<!-- Add Video Modal -->
 <div id="videoModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-[100] p-6">
     <div class="bg-white rounded-3xl w-full max-w-sm p-6 fade-in">
-        <h2 class="text-xl font-extrabold mb-4 text-gray-800">Nayi Video Dalein</h2>
+        <h2 class="text-xl font-extrabold mb-4 text-gray-800">New Video</h2>
         <div class="space-y-4">
-            <input id="vTitle" placeholder="Video ka Title" class="w-full bg-gray-50 border-0 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500">
-            <input id="vSubject" placeholder="Subject (eg. Physics)" class="w-full bg-gray-50 border-0 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500">
-            <input id="vUrl" placeholder="YouTube Link Paste Karein" class="w-full bg-gray-50 border-0 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500">
+            <input id="vTitle" placeholder="Video Title" class="w-full bg-gray-50 border-0 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500">
+            <input id="vSubject" placeholder="Subject (e.g. Physics)" class="w-full bg-gray-50 border-0 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500">
+            <input id="vUrl" placeholder="YouTube URL" class="w-full bg-gray-50 border-0 p-4 rounded-2xl outline-none focus:ring-2 focus:ring-indigo-500">
             <div class="pt-2">
-                <button id="saveBtn" onclick="saveNewVideo()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-indigo-100 active:scale-95 transition-all">PUBLISH VIDEO</button>
-                <button onclick="closeAddModal()" class="w-full py-3 text-gray-400 text-sm font-medium mt-2">Baad mein karenge</button>
+                <button id="saveBtn" onclick="saveNewVideo()" class="w-full bg-indigo-600 text-white py-4 rounded-2xl font-black shadow-xl shadow-indigo-100 active:scale-95 transition-all">SAVE TO VAULT</button>
+                <button onclick="closeAddModal()" class="w-full py-3 text-gray-400 text-xs font-medium mt-2">Close</button>
             </div>
         </div>
     </div>
@@ -90,178 +88,125 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-firestore.js";
-import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
+import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-auth.js";
 
-// Firebase Config
+// --- AAPKA ACTUAL FIREBASE DATA ---
 const firebaseConfig = {
-const    apiKey: "AIzaSyB1bJg4JrtFmceuAZvJaMXgUUhxCf1UKdo",
-const  authDomain: "not-13c89.firebaseapp.com",
-const  projectId: "not-13c89",
-const storageBucket: "not-13c89.firebasestorage.app",
-const messagingSenderId: "684410233370",
-const  appId: "1:684410233370:web:0ed671c584120a4fc1a7a3",
-const measurementId: "G-4CCS45VEDJ"
+  apiKey: "AIzaSyB1bJg4JrtFmceuAZvJaMXgUUhxCf1UKdo",
+  authDomain: "not-13c89.firebaseapp.com",
+  projectId: "not-13c89",
+  storageBucket: "not-13c89.firebasestorage.app",
+  messagingSenderId: "684410233370",
+  appId: "1:684410233370:web:0ed671c584120a4fc1a7a3",
+  measurementId: "G-4CCS45VEDJ"
 };
 
 let videoList = [];
 let isAdminMode = false;
 let currentFilter = 'All';
-const SECRET_KEY = "Jitu9027";
+const SECRET_KEY = "Jitu9027"; 
+let db, auth;
+const VAULT_PATH = "jitu_secure_vault_v1";
 
-// Firestore Collection Path (Rule 1)
-const getCollectionPath = () => collection(db, 'artifacts', appId, 'public', 'data', 'videos');
-
-// App Start
 async function initApp() {
     try {
-        // Fallback for Loading Screen
-        setTimeout(() => {
-            const loader = document.getElementById('loadingStatus');
-            if(loader && loader.style.display !== 'none') {
-                console.log("Database taking long, showing offline UI");
-                document.getElementById('loadingStatus').style.display = 'none';
-                document.getElementById('contentArea').style.display = 'block';
-                renderUI();
-            }
-        }, 6000);
-
-        // Auth Logic (Rule 3)
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-            await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-            await signInAnonymously(auth);
-        }
-
-        onAuthStateChanged(auth, (user) => {
-            if(user) startDataSync();
+        const app = initializeApp(firebaseConfig);
+        db = getFirestore(app);
+        auth = getAuth(app);
+        
+        await signInAnonymously(auth);
+        onAuthStateChanged(auth, (user) => { 
+            if(user) startDataSync(); 
         });
-    } catch(e) {
-        console.error("Auth Fail:", e);
-        document.getElementById('loadingStatus').innerHTML = "<p class='text-red-500 p-4 text-center'>Internet slow hai, please page refresh karein.</p>";
+    } catch(e) { 
+        console.error(e);
+        document.getElementById('loadingMsg').innerText = "Connection failed. Config check karein.";
     }
 }
 
 function startDataSync() {
-    onSnapshot(getCollectionPath(), (snap) => {
+    const collRef = collection(db, 'artifacts', VAULT_PATH, 'public', 'data', 'videos');
+    onSnapshot(collRef, (snap) => {
         videoList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
         videoList.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
-        
         document.getElementById('loadingStatus').style.display = 'none';
         document.getElementById('contentArea').style.display = 'block';
         renderUI();
     }, (err) => {
-        console.error("Firebase Error:", err);
+        console.error(err);
+        document.getElementById('loadingMsg').innerText = "Permission Denied! Firestore Rules check karein.";
     });
 }
 
-// Global UI Controls
-window.openLoginModal = () => {
-    if(isAdminMode) { 
-        if(confirm("Logout karna chahte hain?")) { 
-            isAdminMode = false; 
-            updateAdminState(); 
-        } 
-        return; 
-    }
-    document.getElementById('authModal').classList.remove('hidden');
-};
-window.closeLoginModal = () => document.getElementById('authModal').classList.add('hidden');
-
 window.handleLoginAttempt = () => {
-    const input = document.getElementById('adminPass').value;
-    if(input === SECRET_KEY) {
+    if(document.getElementById('adminPass').value === SECRET_KEY) {
         isAdminMode = true;
-        updateAdminState();
+        document.getElementById('addVideoBtn').classList.remove('hidden');
+        document.getElementById('adminStatusBar').classList.remove('hidden');
+        document.getElementById('authBtnText').innerText = "Logout";
         closeLoginModal();
-        document.getElementById('adminPass').value = '';
-    } else {
-        alert("Galat Password! Sirf Jitu login kar sakta hai.");
-    }
+        renderUI();
+    } else alert("Invalid Admin Key");
 };
-
-window.openAddModal = () => document.getElementById('videoModal').classList.remove('hidden');
-window.closeAddModal = () => document.getElementById('videoModal').classList.add('hidden');
 
 window.saveNewVideo = async () => {
-    if(!auth.currentUser) return alert("System connect nahi hai, refresh karein.");
-    
-    const title = vTitle.value.trim();
-    const subject = vSubject.value.trim();
-    const url = vUrl.value.trim();
+    if(!isAdminMode) return;
+    const title = document.getElementById('vTitle').value;
+    const subject = document.getElementById('vSubject').value || 'General';
+    const url = document.getElementById('vUrl').value;
     const ytId = url.match(/(?:v=|\/|embed\/|youtu.be\/)([0-9A-Za-z_-]{11})/)?.[1];
-
-    if(!title || !subject || !ytId) return alert("Sari details sahi se bharein (YouTube link check karein)");
-
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.innerText = "UPLOADING...";
+    
+    if(!title || !ytId) return alert("Title aur YouTube link sahi dalein");
 
     try {
-        await addDoc(getCollectionPath(), {
-            title, subject, url, ytId, createdAt: Date.now()
-        });
-        vTitle.value = vSubject.value = vUrl.value = '';
+        const collRef = collection(db, 'artifacts', VAULT_PATH, 'public', 'data', 'videos');
+        await addDoc(collRef, { title, subject, url, ytId, createdAt: Date.now() });
         closeAddModal();
-    } catch(e) {
-        alert("Upload fail ho gaya! Connection check karein.");
-    }
-    btn.disabled = false;
-    btn.innerText = "PUBLISH VIDEO";
+        document.getElementById('vTitle').value = '';
+        document.getElementById('vSubject').value = '';
+        document.getElementById('vUrl').value = '';
+    } catch(e) { alert("Save error! Database Rules check karein."); }
 };
 
 window.removeVideo = async (id) => {
-    if(confirm("Kya aap is video ko sabke liye delete karna chahte hain?")) {
-        try {
-            await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'videos', id));
-        } catch(e) { alert("Delete nahi ho paya."); }
+    if(!isAdminMode) return;
+    if(confirm("Delete this video?")) {
+        await deleteDoc(doc(db, 'artifacts', VAULT_PATH, 'public', 'data', 'videos', id));
     }
 };
 
+window.openLoginModal = () => {
+    if(isAdminMode) { isAdminMode = false; location.reload(); return; }
+    document.getElementById('authModal').classList.remove('hidden');
+};
+window.closeLoginModal = () => document.getElementById('authModal').classList.add('hidden');
+window.openAddModal = () => document.getElementById('videoModal').classList.remove('hidden');
+window.closeAddModal = () => document.getElementById('videoModal').classList.add('hidden');
 window.setCategory = (s) => { currentFilter = s; renderUI(); };
-
-function updateAdminState() {
-    document.getElementById('addVideoBtn').classList.toggle('hidden', !isAdminMode);
-    document.getElementById('adminStatusBar').classList.toggle('hidden', !isAdminMode);
-    document.getElementById('authBtnText').innerText = isAdminMode ? "Logout" : "Admin";
-    renderUI();
-}
 
 window.renderUI = () => {
     const grid = document.getElementById('videoContainer');
     const filterBox = document.getElementById('subjectFilters');
     const searchVal = document.getElementById('searchInput').value.toLowerCase();
     
-    // Create Subject Buttons
-    const allSubjects = ['All', ...new Set(videoList.map(v => v.subject))];
-    filterBox.innerHTML = allSubjects.map(s => `
-        <button onclick="setCategory('${s}')" class="whitespace-nowrap px-5 py-2 rounded-xl text-xs font-bold transition-all ${currentFilter === s ? 'bg-indigo-600 text-white shadow-lg' : 'bg-white text-gray-500 border'}">
+    const allSubs = ['All', ...new Set(videoList.map(v => v.subject))];
+    filterBox.innerHTML = allSubs.map(s => `
+        <button onclick="setCategory('${s}')" class="px-5 py-2 rounded-xl text-xs font-bold transition-all ${currentFilter === s ? 'bg-indigo-600 text-white' : 'bg-white border text-gray-400'}">
             ${s}
         </button>
     `).join('');
 
-    // Filter Logic
-    const filteredItems = videoList.filter(v => 
-        (currentFilter === 'All' || v.subject === currentFilter) &&
-        (v.title.toLowerCase().includes(searchVal) || v.subject.toLowerCase().includes(searchVal))
-    );
-
-    document.getElementById('emptyState').classList.toggle('hidden', filteredItems.length > 0);
+    const items = videoList.filter(v => (currentFilter === 'All' || v.subject === currentFilter) && v.title.toLowerCase().includes(searchVal));
+    document.getElementById('emptyState').classList.toggle('hidden', items.length > 0);
     
-    grid.innerHTML = filteredItems.map(v => `
-        <div class="glass-card rounded-3xl overflow-hidden fade-in shadow-sm hover:shadow-xl transition-all border-white">
-            <div class="relative aspect-video">
-                <img src="https://img.youtube.com/vi/${v.ytId}/mqdefault.jpg" class="w-full h-full object-cover">
-                <div class="absolute top-3 left-3 bg-indigo-600/90 text-white px-3 py-1 rounded-full text-[10px] font-bold">${v.subject}</div>
-            </div>
+    grid.innerHTML = items.map(v => `
+        <div class="glass-card rounded-3xl overflow-hidden shadow-sm fade-in">
+            <img src="https://img.youtube.com/vi/${v.ytId}/mqdefault.jpg" class="w-full aspect-video object-cover">
             <div class="p-5">
-                <h3 class="font-bold text-sm text-gray-800 mb-4 line-clamp-2 h-10 leading-snug">${v.title}</h3>
-                <div class="flex justify-between items-center gap-3">
-                    <a href="${v.url}" target="_blank" class="flex-1 text-center bg-indigo-600 text-white py-2.5 rounded-2xl text-xs font-bold active:scale-95 transition-all">Watch Now</a>
-                    ${isAdminMode ? `
-                        <button onclick="removeVideo('${v.id}')" class="bg-red-50 text-red-500 p-2.5 rounded-xl active:scale-95">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                        </button>
-                    ` : ''}
+                <h3 class="font-bold text-sm mb-4 line-clamp-2 h-10 leading-tight">${v.title}</h3>
+                <div class="flex gap-2">
+                    <a href="${v.url}" target="_blank" class="flex-1 text-center bg-indigo-600 text-white py-2.5 rounded-2xl text-[11px] font-bold">Watch Video</a>
+                    ${isAdminMode ? `<button onclick="removeVideo('${v.id}')" class="text-red-500 bg-red-50 p-2 rounded-xl">✕</button>` : ''}
                 </div>
             </div>
         </div>
@@ -272,4 +217,4 @@ document.getElementById('searchInput').addEventListener('input', renderUI);
 initApp();
 </script>
 </body>
-    </html>
+            </html>
